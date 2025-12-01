@@ -2,32 +2,43 @@ const fs = require('fs')
 const axios = require('axios')
 const OLLAMA_API_URL = 'http://localhost:11434/api/generate'
 
-async function generarTexto() {
+// Función principal asíncrona
+async function parafrasearTexto() {
     try {
-        // 1. Leer el archivo de entrada (nuestro prompt)
-        const promptTexto = fs.readFileSync('entrada.txt', 'utf-8');
-        console.log(`Enviando prompt: "${promptTexto}"`);
+        // 1. Leer el texto original a parafrasear
+        const textoOriginal = fs.readFileSync('entrada.txt', 'utf-8');
+        console.log(`Original: "${textoOriginal}"`);
 
-        // 2. Preparar el cuerpo (payload) para la API de Ollama
+        // 2. ¡LA CLAVE! Construir un prompt de "instrucción"
+        const promptCompleto = `
+            Actúa como un escritor experto. 
+            Paráfrasea el siguiente texto, manteniendo el significado original pero usando palabras y estructuras de oración diferentes.
+            No añadas ninguna explicación o comentario introductorio. Solo entrega el texto parafraseado.
+
+            TEXTO A PARAFRASEAR:
+            "${textoOriginal}"
+        `;
+
+        // 3. Preparar el cuerpo (payload) para la API
         const datosParaAPI = {
-            model: "mistral", // El modelo que descargamos
-            prompt: promptTexto, // El texto de nuestro archivo
-            stream: false // Importante: le pedimos la respuesta completa, no en trozos
+            model: "mistral",
+            prompt: promptCompleto, // ¡Usamos nuestro nuevo prompt!
+            stream: false
         };
 
-        // 3. Realizar la petición HTTP POST con axios
-        console.log('Esperando respuesta de Ollama (esto puede tardar)...');
+        // 4. Realizar la petición (el resto del código es igual)
+        console.log('Parafraseando texto (esto puede tardar)...');
         const respuestaAPI = await axios.post(OLLAMA_API_URL, datosParaAPI);
 
-        // 4. Extraer y guardar la respuesta
-        const respuestaTexto = respuestaAPI.data.response;
-        fs.writeFileSync('salida.txt', respuestaTexto);
+        // 5. Extraer y guardar la respuesta
+        const textoParafraseado = respuestaAPI.data.response.trim(); // .trim() quita espacios extra
+        fs.writeFileSync('salida.txt', textoParafraseado);
 
-        console.log(' ¡Éxito! Respuesta guardada en "salida.txt"');
-        console.log('Respuesta:', respuestaTexto);
+        console.log('¡Éxito! Texto parafraseado guardado en "salida.txt"');
+        console.log('Respuesta:', textoParafraseado);
 
     } catch (error) {
-        console.error(' Ha ocurrido un error:');
+        console.error('Ha ocurrido un error:');
         if (error.code === 'ECONNREFUSED') {
             console.error('Error: No se pudo conectar. ¿Está Ollama corriendo?');
         } else {
@@ -35,4 +46,6 @@ async function generarTexto() {
         }
     }
 }
-generarTexto();
+
+// No olvides llamar a la nueva función
+parafrasearTexto();
