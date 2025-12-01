@@ -29,7 +29,7 @@ async function chatearConModeloLocal() {
             ],
             // El nombre del modelo es menos importante aquí, 
             // ya que LM Studio usa el que cargaste en la UI.
-            model: 'openai/gpt-oss-20b:2',
+            model: 'deepseek-r1-distill-qwen-7b',
             temperature: 0.7, // Controla la creatividad (0.1 = preciso, 1.0 = creativo)
         });
 
